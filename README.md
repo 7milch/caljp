@@ -24,11 +24,8 @@ On a terminal, Sundays and holidays (the 3rd and 23rd above) are red, Saturdays 
 With Homebrew, on macOS or Linux:
 
 ```sh
-brew tap 7milch/caljp https://github.com/7milch/caljp
-brew install 7milch/caljp/caljp
+brew install 7milch/tap/caljp
 ```
-
-Homebrew refuses the short name `caljp` for a tap it does not trust yet, so use the full name.
 
 Or download a binary from [Releases](https://github.com/7milch/caljp/releases) and put it on your `PATH`.
 
@@ -122,11 +119,8 @@ Su Mo Tu We Th Fr Sa
 macOS でも Linux でも、Homebrew で入れられます。
 
 ```sh
-brew tap 7milch/caljp https://github.com/7milch/caljp
-brew install 7milch/caljp/caljp
+brew install 7milch/tap/caljp
 ```
-
-Homebrew はまだ信頼していない tap の formula を `caljp` という短い名前では読み込まないので、完全な名前で指定してください。
 
 [Releases](https://github.com/7milch/caljp/releases) からバイナリをダウンロードして、`PATH` の通った場所に置く方法もあります。
 
