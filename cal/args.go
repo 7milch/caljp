@@ -26,6 +26,8 @@ var unsupported = map[byte]string{
 	'd': "debug current date", 'H': "debug highlight date",
 }
 
+var errRange = fmt.Errorf("months outside the years 1..9999")
+
 type unsupportedError string
 
 func (e unsupportedError) Error() string { return string(e) }
@@ -120,10 +122,22 @@ func Parse(args []string, now time.Time) (Options, error) {
 		return o, fmt.Errorf("invalid --color value %q (auto, always or never)", o.Color)
 	}
 
-	o.First, o.Count, err = months(pos, monthArg, span, now)
-	o.First = o.First.AddDate(0, -before, 0)
-	if o.Count += before + after; err == nil && o.Count < 1 {
-		err = fmt.Errorf("no months to show")
+	first, count, err := months(pos, monthArg, span, now)
+	if err != nil {
+		return o, err
 	}
-	return o, err
+	// Month numbers counted from January of year 0 keep the range check free of overflow.
+	const limit = 10000 * 12
+	if before < -limit || before > limit || after < -limit || after > limit {
+		return o, errRange
+	}
+	start := first.Year()*12 + int(first.Month()) - 1 - before
+	o.First, o.Count = first.AddDate(0, -before, 0), count+before+after
+	switch {
+	case o.Count < 1:
+		return o, fmt.Errorf("no months to show")
+	case start < 12 || start+o.Count > limit:
+		return o, errRange
+	}
+	return o, nil
 }

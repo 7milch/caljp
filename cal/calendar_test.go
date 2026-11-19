@@ -165,3 +165,21 @@ func TestRenderWeeks(t *testing.T) {
 		t.Errorf("got:\n%s\nwant:\n%s", strings.Join(got, "\n"), strings.Join(want, "\n"))
 	}
 }
+
+// A lone Sunday at the end of a Sunday-first month belongs to the next ISO week.
+func TestRenderWeeksSundayStart(t *testing.T) {
+	got := lines(Options{First: date(2026, time.May, 1), Count: 1, Weeks: true})
+	want := []string{
+		"         May 2026",
+		"   Su Mo Tu We Th Fr Sa",
+		"18                 1  2",
+		"19  3  4  5  6  7  8  9",
+		"20 10 11 12 13 14 15 16",
+		"21 17 18 19 20 21 22 23",
+		"22 24 25 26 27 28 29 30",
+		"23 31",
+	}
+	if strings.Join(got, "\n") != strings.Join(want, "\n") {
+		t.Errorf("got:\n%s\nwant:\n%s", strings.Join(got, "\n"), strings.Join(want, "\n"))
+	}
+}

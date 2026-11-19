@@ -120,3 +120,19 @@ func TestParseErrors(t *testing.T) {
 		t.Errorf("-J message: %q", err)
 	}
 }
+
+func TestParseRange(t *testing.T) {
+	for _, args := range []string{
+		"-A 30000000", "-B 99999", "-3 1 1", "-m 1p 1", "-m 8f 9999", "-3 12 9999",
+		"-B 4000000000000 -A -3999999999999", "-A 9223372036854775807",
+	} {
+		if _, err := Parse(strings.Fields(args), now); err == nil || !strings.Contains(err.Error(), "1..9999") {
+			t.Errorf("%q: want a range error, got %v", args, err)
+		}
+	}
+	for _, args := range []string{"1 1", "12 9999", "-3 2 1", "-y 9999", "-B 24310"} {
+		if _, err := Parse(strings.Fields(args), now); err != nil {
+			t.Errorf("%q: unexpected error %v", args, err)
+		}
+	}
+}

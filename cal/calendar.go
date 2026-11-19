@@ -83,7 +83,7 @@ func block(o Options, p Palette, first time.Time, title string) []string {
 
 	d := first.AddDate(0, 0, -int((first.Weekday()-start+7)%7))
 	for d.Before(first.AddDate(0, 1, 0)) {
-		week, last := make([]string, 7), d
+		week, monday := make([]string, 7), d.AddDate(0, 0, int(time.Monday-start))
 		for i := range week {
 			week[i] = strings.Repeat(" ", cell)
 			if d.Month() == first.Month() {
@@ -93,13 +93,12 @@ func block(o Options, p Palette, first time.Time, title string) []string {
 				}
 				s := strconv.Itoa(n)
 				week[i] = strings.Repeat(" ", cell-len(s)) + p.Day(s, d)
-				last = d
 			}
 			d = d.AddDate(0, 0, 1)
 		}
 		line := strings.Join(week, " ")
 		if o.Weeks {
-			_, n := last.ISOWeek()
+			_, n := monday.ISOWeek()
 			line = fmt.Sprintf("%2d ", n) + line
 		}
 		lines = append(lines, line)
