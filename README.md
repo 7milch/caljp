@@ -29,6 +29,13 @@ With Homebrew, on macOS or Linux:
 brew install 7milch/tap/caljp
 ```
 
+On Ubuntu or Debian, install the `.deb` package (use `caljp_arm64.deb` on ARM). It does not update itself; run the same two lines again for a new release.
+
+```sh
+curl -LO https://github.com/7milch/caljp/releases/latest/download/caljp_amd64.deb
+sudo apt install ./caljp_amd64.deb
+```
+
 Or download a binary from [Releases](https://github.com/7milch/caljp/releases) and put it on your `PATH`.
 
 `go install github.com/7milch/caljp@latest` also works, but it builds the latest commit of `main` rather than a release, because Go does not recognise calendar versions as module versions.
@@ -122,6 +129,13 @@ macOS でも Linux でも、Homebrew で入れられます。
 
 ```sh
 brew install 7milch/tap/caljp
+```
+
+Ubuntu や Debian では `.deb` パッケージを入れられます（ARM では `caljp_arm64.deb`）。自動では更新されないので、新しい版を入れるときは同じ 2 行をもう一度実行してください。
+
+```sh
+curl -LO https://github.com/7milch/caljp/releases/latest/download/caljp_amd64.deb
+sudo apt install ./caljp_amd64.deb
 ```
 
 [Releases](https://github.com/7milch/caljp/releases) からバイナリをダウンロードして、`PATH` の通った場所に置く方法もあります。

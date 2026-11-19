@@ -17,6 +17,16 @@ builds:
 archives:
   - formats: [tar.gz]
 
+nfpms:
+  - formats: [deb]
+    # No version in the name, so releases/latest/download/caljp_amd64.deb always works.
+    file_name_template: "{{ .ProjectName }}_{{ .Arch }}"
+    maintainer: 7milch <7milch@users.noreply.github.com>
+    homepage: https://github.com/7milch/caljp
+    description: BSD cal clone that colors Japanese holidays
+    license: MIT
+    section: utils
+
 checksum:
   name_template: checksums.txt
 
