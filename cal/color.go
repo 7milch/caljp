@@ -19,17 +19,17 @@ var (
 	}
 )
 
-// Palette decorates cells; the zero value leaves text unchanged.
-type Palette struct {
+// palette decorates cells; the zero value leaves text unchanged.
+type palette struct {
 	codes     map[string]int
 	today     time.Time
-	holidays  Holidays
+	holidays  holidays
 	highlight bool
 }
 
-// NewPalette applies style on top of the defaults; highlight marks today in reverse video.
-func NewPalette(style string, today time.Time, hol Holidays, highlight bool) (Palette, error) {
-	p := Palette{map[string]int{}, today, hol, highlight}
+// newPalette applies style on top of the defaults; highlight marks today in reverse video.
+func newPalette(style string, today time.Time, hol holidays, highlight bool) (palette, error) {
+	p := palette{map[string]int{}, today, hol, highlight}
 	if style != "" {
 		style = "," + style
 	}
@@ -44,12 +44,12 @@ func NewPalette(style string, today time.Time, hol Holidays, highlight bool) (Pa
 	return p, nil
 }
 
-// UseColor decides whether to emit escape codes; tty and noColor only matter for "auto".
-func UseColor(mode string, tty, noColor bool) bool {
+// useColor decides whether to emit escape codes; tty and noColor only matter for "auto".
+func useColor(mode string, tty, noColor bool) bool {
 	return mode == "always" || mode == "auto" && tty && !noColor
 }
 
-func (p Palette) Day(text string, d time.Time) string {
+func (p palette) day(text string, d time.Time) string {
 	code := p.codes[styleKeys[d.Weekday()]]
 	if h := p.codes["holiday"]; h != 0 && p.holidays[d] {
 		code = h
@@ -57,7 +57,7 @@ func (p Palette) Day(text string, d time.Time) string {
 	return paint(text, code, p.highlight && d.Equal(p.today))
 }
 
-func (p Palette) Head(text string, wd time.Weekday) string {
+func (p palette) head(text string, wd time.Weekday) string {
 	return paint(text, p.codes[styleKeys[wd]], false)
 }
 

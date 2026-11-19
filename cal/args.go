@@ -7,10 +7,10 @@ import (
 	"time"
 )
 
-const Usage = "usage: caljp [-13hjMSwy] [-A n] [-B n] [-m month] [--color when] [--style spec] [--refresh] [[month] year]"
+const usage = "usage: caljp [-13hjMSwy] [-A n] [-B n] [-m month] [--color when] [--style spec] [--refresh] [[month] year]"
 
-// Options is the fully resolved command line.
-type Options struct {
+// options is the fully resolved command line.
+type options struct {
 	First                          time.Time // first day of the first month shown
 	Count                          int       // number of months
 	Monday, Julian, Weeks, NoToday bool
@@ -36,9 +36,9 @@ func date(y int, m time.Month, d int) time.Time {
 	return time.Date(y, m, d, 0, 0, 0, 0, time.UTC)
 }
 
-// Parse reads BSD cal style arguments; now supplies the default month and year.
-func Parse(args []string, now time.Time) (Options, error) {
-	o := Options{Color: "auto"}
+// parse reads BSD cal style arguments; now supplies the default month and year.
+func parse(args []string, now time.Time) (options, error) {
+	o := options{Color: "auto"}
 	span, before, after, monthArg := byte(0), 0, 0, ""
 	var pos []string
 	var err error

@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-var testHolidays = Holidays{
+var testHolidays = holidays{
 	date(2026, time.November, 3):  true, // Tuesday
 	date(2026, time.November, 22): true, // Sunday, made up for the test
 	date(2026, time.November, 23): true, // Monday
@@ -14,7 +14,7 @@ var testHolidays = Holidays{
 func nov(d int) time.Time { return date(2026, time.November, d) }
 
 func TestPaletteDefault(t *testing.T) {
-	p, err := NewPalette("", nov(19), testHolidays, true)
+	p, err := newPalette("", nov(19), testHolidays, true)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -26,14 +26,14 @@ func TestPaletteDefault(t *testing.T) {
 		19: "\x1b[7m19\x1b[0m", // today
 	}
 	for d, want := range days {
-		if got := p.Day(nov(d).Format("2"), nov(d)); got != want {
+		if got := p.day(nov(d).Format("2"), nov(d)); got != want {
 			t.Errorf("day %d: %q, want %q", d, got, want)
 		}
 	}
-	if got := p.Head("Su", time.Sunday); got != "\x1b[31mSu\x1b[0m" {
+	if got := p.head("Su", time.Sunday); got != "\x1b[31mSu\x1b[0m" {
 		t.Errorf("sunday head %q", got)
 	}
-	if got := p.Head("Mo", time.Monday); got != "Mo" {
+	if got := p.head("Mo", time.Monday); got != "Mo" {
 		t.Errorf("monday head %q", got)
 	}
 }
@@ -60,12 +60,12 @@ func TestPaletteStyle(t *testing.T) {
 		{"", 22, false, 22, "\x1b[31m22\x1b[0m"},
 	}
 	for _, tt := range tests {
-		p, err := NewPalette(tt.style, nov(tt.today), testHolidays, tt.highlight)
+		p, err := newPalette(tt.style, nov(tt.today), testHolidays, tt.highlight)
 		if err != nil {
 			t.Errorf("%q: %v", tt.style, err)
 			continue
 		}
-		if got := p.Day(nov(tt.day).Format("2"), nov(tt.day)); got != tt.want {
+		if got := p.day(nov(tt.day).Format("2"), nov(tt.day)); got != tt.want {
 			t.Errorf("%q day %d: %q, want %q", tt.style, tt.day, got, tt.want)
 		}
 	}
@@ -73,16 +73,16 @@ func TestPaletteStyle(t *testing.T) {
 
 func TestPaletteErrors(t *testing.T) {
 	for _, style := range []string{"foo=red", "sat=pink", "sat", "sat=", "=red", "sat=red,", "sat=red;sun=blue"} {
-		if _, err := NewPalette(style, nov(19), nil, true); err == nil {
+		if _, err := newPalette(style, nov(19), nil, true); err == nil {
 			t.Errorf("%q: expected an error", style)
 		}
 	}
 }
 
 func TestZeroPalette(t *testing.T) {
-	var p Palette
-	if p.Day("1", nov(1)) != "1" || p.Head("Su", time.Sunday) != "Su" {
-		t.Error("zero Palette must not decorate")
+	var p palette
+	if p.day("1", nov(1)) != "1" || p.head("Su", time.Sunday) != "Su" {
+		t.Error("zero palette must not decorate")
 	}
 }
 
@@ -99,8 +99,8 @@ func TestUseColor(t *testing.T) {
 		{"auto", true, true, false},
 	}
 	for _, tt := range tests {
-		if got := UseColor(tt.mode, tt.tty, tt.noColor); got != tt.want {
-			t.Errorf("UseColor(%q, %v, %v) = %v", tt.mode, tt.tty, tt.noColor, got)
+		if got := useColor(tt.mode, tt.tty, tt.noColor); got != tt.want {
+			t.Errorf("useColor(%q, %v, %v) = %v", tt.mode, tt.tty, tt.noColor, got)
 		}
 	}
 }

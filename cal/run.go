@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-const help = Usage + `
+const help = usage + `
 
   -1, -3, -y      one month (default), three months, the whole year
   -A n, -B n      add n months after / before
@@ -36,15 +36,15 @@ type Env struct {
 
 // Run executes caljp and returns the exit code.
 func Run(args []string, stdout, stderr io.Writer, env Env) int {
-	o, err := Parse(args, env.Now)
-	var palette Palette
+	o, err := parse(args, env.Now)
+	var p palette
 	if err == nil {
-		palette, err = NewPalette(o.Style, env.Now, LoadHolidays(env.Cache), !o.NoToday)
+		p, err = newPalette(o.Style, env.Now, loadHolidays(env.Cache), !o.NoToday)
 	}
 	if err != nil {
 		fmt.Fprintf(stderr, "caljp: %v\n", err)
 		if !errors.As(err, new(unsupportedError)) {
-			fmt.Fprintln(stderr, Usage)
+			fmt.Fprintln(stderr, usage)
 		}
 		return 2
 	}
@@ -55,19 +55,19 @@ func Run(args []string, stdout, stderr io.Writer, env Env) int {
 	case o.Version:
 		fmt.Fprintf(stdout, "caljp %s\n", env.Version)
 	case o.Refresh:
-		h, err := Refresh(env.URL, env.Cache)
+		h, err := refresh(env.URL, env.Cache)
 		if err != nil {
 			fmt.Fprintf(stderr, "caljp: %v\n", err)
 			return 1
 		}
-		first, last := h.Range()
+		first, last := h.bounds()
 		fmt.Fprintf(stdout, "holidays updated: %s..%s (%d days)\n",
 			first.Format(time.DateOnly), last.Format(time.DateOnly), len(h))
 	default:
-		if !UseColor(o.Color, env.TTY, env.NoColor) {
-			palette = Palette{}
+		if !useColor(o.Color, env.TTY, env.NoColor) {
+			p = palette{}
 		}
-		fmt.Fprint(stdout, Render(o, palette))
+		fmt.Fprint(stdout, render(o, p))
 	}
 	return 0
 }

@@ -24,12 +24,12 @@ const maxBody = 1 << 20
 //go:embed holidays.csv
 var embedded []byte
 
-// Holidays is the set of holiday dates, keyed by UTC midnight.
-type Holidays map[time.Time]bool
+// holidays is the set of holiday dates, keyed by UTC midnight.
+type holidays map[time.Time]bool
 
 // parseHolidays reads only the date column, so the encoding of the names does not matter.
-func parseHolidays(r io.Reader) Holidays {
-	h := Holidays{}
+func parseHolidays(r io.Reader) holidays {
+	h := holidays{}
 	for s := bufio.NewScanner(r); s.Scan(); {
 		field, _, _ := strings.Cut(s.Text(), ",")
 		if d, err := time.Parse("2006/1/2", field); err == nil {
@@ -39,8 +39,8 @@ func parseHolidays(r io.Reader) Holidays {
 	return h
 }
 
-// Range returns the earliest and latest holiday.
-func (h Holidays) Range() (first, last time.Time) {
+// bounds returns the earliest and latest holiday.
+func (h holidays) bounds() (first, last time.Time) {
 	for d := range h {
 		if first.IsZero() || d.Before(first) {
 			first = d
@@ -61,21 +61,21 @@ func CachePath() string {
 	return filepath.Join(dir, "caljp", "holidays.csv")
 }
 
-// LoadHolidays picks the embedded list or the cache, whichever reaches further into the future.
-func LoadHolidays(cachePath string) Holidays {
+// loadHolidays picks the embedded list or the cache, whichever reaches further into the future.
+func loadHolidays(cachePath string) holidays {
 	h := parseHolidays(bytes.NewReader(embedded))
 	if data, err := os.ReadFile(cachePath); err == nil {
 		cached := parseHolidays(bytes.NewReader(data))
-		_, a := h.Range()
-		if _, b := cached.Range(); len(cached) > 0 && !b.Before(a) {
+		_, a := h.bounds()
+		if _, b := cached.bounds(); len(cached) > 0 && !b.Before(a) {
 			return cached
 		}
 	}
 	return h
 }
 
-// Refresh downloads the list and replaces the cache only if it looks valid.
-func Refresh(url, cachePath string) (Holidays, error) {
+// refresh downloads the list and replaces the cache only if it looks valid.
+func refresh(url, cachePath string) (holidays, error) {
 	if cachePath == "" {
 		return nil, fmt.Errorf("no cache directory on this system")
 	}

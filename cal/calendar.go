@@ -11,8 +11,8 @@ const gap = "  "
 
 var dayNames = [...]string{"Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"}
 
-// Render draws the months selected by o.
-func Render(o Options, p Palette) string {
+// render draws the months selected by o.
+func render(o options, p palette) string {
 	perRow := 3
 	if o.Julian {
 		perRow = 2
@@ -47,14 +47,14 @@ func Render(o Options, p Palette) string {
 	return b.String()
 }
 
-func (o Options) cell() int {
+func (o options) cell() int {
 	if o.Julian {
 		return 3
 	}
 	return 2
 }
 
-func (o Options) width() int {
+func (o options) width() int {
 	w := 7*o.cell() + 6
 	if o.Weeks {
 		w += 3
@@ -63,7 +63,7 @@ func (o Options) width() int {
 }
 
 // block returns one month as lines of equal visible width.
-func block(o Options, p Palette, first time.Time, title string) []string {
+func block(o options, p palette, first time.Time, title string) []string {
 	cell, start, margin := o.cell(), time.Sunday, ""
 	if o.Monday {
 		start = time.Monday
@@ -74,7 +74,7 @@ func block(o Options, p Palette, first time.Time, title string) []string {
 	head := make([]string, 7)
 	for i := range head {
 		wd := (start + time.Weekday(i)) % 7
-		head[i] = strings.Repeat(" ", cell-2) + p.Head(dayNames[wd], wd)
+		head[i] = strings.Repeat(" ", cell-2) + p.head(dayNames[wd], wd)
 	}
 	lines := []string{
 		margin + center(title, 7*cell+6),
@@ -92,7 +92,7 @@ func block(o Options, p Palette, first time.Time, title string) []string {
 					n = d.YearDay()
 				}
 				s := strconv.Itoa(n)
-				week[i] = strings.Repeat(" ", cell-len(s)) + p.Day(s, d)
+				week[i] = strings.Repeat(" ", cell-len(s)) + p.day(s, d)
 			}
 			d = d.AddDate(0, 0, 1)
 		}

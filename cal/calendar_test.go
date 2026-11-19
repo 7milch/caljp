@@ -6,8 +6,8 @@ import (
 	"time"
 )
 
-func month(y int, m time.Month) Options {
-	return Options{First: date(y, m, 1), Count: 1}
+func month(y int, m time.Month) options {
+	return options{First: date(y, m, 1), Count: 1}
 }
 
 func checkShape(t *testing.T, out string) {
@@ -43,34 +43,34 @@ Mo Tu We Th Fr Sa Su
 	monday := month(2026, time.November)
 	monday.Monday = true
 
-	if got := Render(month(2026, time.November), Palette{}); got != nov {
+	if got := render(month(2026, time.November), palette{}); got != nov {
 		t.Errorf("sunday start:\n%s\nwant:\n%s", got, nov)
 	}
-	if got := Render(monday, Palette{}); got != novMonday {
+	if got := render(monday, palette{}); got != novMonday {
 		t.Errorf("monday start:\n%s\nwant:\n%s", got, novMonday)
 	}
 
-	leap := Render(month(2024, time.February), Palette{})
+	leap := render(month(2024, time.February), palette{})
 	if !strings.HasSuffix(leap, "\n25 26 27 28 29\n") {
 		t.Errorf("leap february:\n%s", leap)
 	}
 
-	four := Render(month(2026, time.February), Palette{})
+	four := render(month(2026, time.February), palette{})
 	if n := strings.Count(four, "\n"); n != 6 {
 		t.Errorf("february 2026 has %d lines, want 6:\n%s", n, four)
 	}
 
-	for _, out := range []string{nov, leap, four, Render(monday, Palette{})} {
+	for _, out := range []string{nov, leap, four, render(monday, palette{})} {
 		checkShape(t, out)
 	}
 }
 
-func lines(o Options) []string {
-	return strings.Split(strings.TrimSuffix(Render(o, Palette{}), "\n"), "\n")
+func lines(o options) []string {
+	return strings.Split(strings.TrimSuffix(render(o, palette{}), "\n"), "\n")
 }
 
 func TestRenderThree(t *testing.T) {
-	got := lines(Options{First: date(2026, time.October, 1), Count: 3})
+	got := lines(options{First: date(2026, time.October, 1), Count: 3})
 	for title, col := range map[string]int{"October 2026": 4, "November 2026": 25, "December 2026": 47} {
 		if i := strings.Index(got[0], title); i != col {
 			t.Errorf("%s at column %d, want %d: %q", title, i, col, got[0])
@@ -88,15 +88,15 @@ func TestRenderThree(t *testing.T) {
 	}
 
 	// August 2026 needs six week rows, its neighbours five.
-	got = lines(Options{First: date(2026, time.July, 1), Count: 3})
+	got = lines(options{First: date(2026, time.July, 1), Count: 3})
 	if len(got) != 8 || got[7] != strings.Repeat(" ", 22)+"30 31" {
 		t.Errorf("uneven months:\n%s", strings.Join(got, "\n"))
 	}
-	checkShape(t, Render(Options{First: date(2026, time.July, 1), Count: 3}, Palette{}))
+	checkShape(t, render(options{First: date(2026, time.July, 1), Count: 3}, palette{}))
 }
 
 func TestRenderYear(t *testing.T) {
-	out := Render(Options{First: date(2027, time.January, 1), Count: 12}, Palette{})
+	out := render(options{First: date(2027, time.January, 1), Count: 12}, palette{})
 	got := strings.Split(strings.TrimSuffix(out, "\n"), "\n")
 	if got[0] != strings.Repeat(" ", 30)+"2027" || got[1] != "" {
 		t.Errorf("year title %q %q", got[0], got[1])
@@ -119,21 +119,21 @@ func TestRenderYear(t *testing.T) {
 }
 
 func TestRenderSpanYears(t *testing.T) {
-	got := lines(Options{First: date(2026, time.December, 1), Count: 3})
+	got := lines(options{First: date(2026, time.December, 1), Count: 3})
 	for _, title := range []string{"December 2026", "January 2027", "February 2027"} {
 		if !strings.Contains(got[0], title) {
 			t.Errorf("missing %q in %q", title, got[0])
 		}
 	}
 	// Twelve months that are not one calendar year get no year title.
-	got = lines(Options{First: date(2026, time.November, 1), Count: 12})
+	got = lines(options{First: date(2026, time.November, 1), Count: 12})
 	if !strings.Contains(got[0], "November 2026") {
 		t.Errorf("first line %q", got[0])
 	}
 }
 
 func TestRenderJulian(t *testing.T) {
-	got := lines(Options{First: date(2026, time.February, 1), Count: 1, Julian: true})
+	got := lines(options{First: date(2026, time.February, 1), Count: 1, Julian: true})
 	if got[0] != strings.Repeat(" ", 7)+"February 2026" {
 		t.Errorf("title %q", got[0])
 	}
@@ -143,14 +143,14 @@ func TestRenderJulian(t *testing.T) {
 	if got[2] != " 32  33  34  35  36  37  38" {
 		t.Errorf("first week %q", got[2])
 	}
-	got = lines(Options{First: date(2026, time.February, 1), Count: 3, Julian: true})
+	got = lines(options{First: date(2026, time.February, 1), Count: 3, Julian: true})
 	if !strings.Contains(got[0], "March 2026") || strings.Contains(got[0], "April") {
 		t.Errorf("two months per row expected: %q", got[0])
 	}
 }
 
 func TestRenderWeeks(t *testing.T) {
-	got := lines(Options{First: date(2026, time.November, 1), Count: 1, Monday: true, Weeks: true})
+	got := lines(options{First: date(2026, time.November, 1), Count: 1, Monday: true, Weeks: true})
 	want := []string{
 		"      November 2026",
 		"   Mo Tu We Th Fr Sa Su",
@@ -168,7 +168,7 @@ func TestRenderWeeks(t *testing.T) {
 
 // A lone Sunday at the end of a Sunday-first month belongs to the next ISO week.
 func TestRenderWeeksSundayStart(t *testing.T) {
-	got := lines(Options{First: date(2026, time.May, 1), Count: 1, Weeks: true})
+	got := lines(options{First: date(2026, time.May, 1), Count: 1, Weeks: true})
 	want := []string{
 		"         May 2026",
 		"   Su Mo Tu We Th Fr Sa",
