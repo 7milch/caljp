@@ -5,21 +5,21 @@
 class Caljp < Formula
   desc "BSD cal clone that colors Japanese holidays"
   homepage "https://github.com/7milch/caljp"
-  version "2026.11.0"
+  version "2026.11.1"
   license "MIT"
 
   on_macos do
     if Hardware::CPU.intel?
-      url "https://github.com/7milch/caljp/releases/download/v2026.11.0/caljp_2026.11.0_darwin_amd64.tar.gz"
-      sha256 "7b199f12a8bc5ea5dcc3262336f9bfff03d4e7de6d25f9e3f55fc59399967f88"
+      url "https://github.com/7milch/caljp/releases/download/v2026.11.1/caljp_2026.11.1_darwin_amd64.tar.gz"
+      sha256 "8f4afa5f008400595674fe26d7f705c64a2e86f733a16b0694cdec7bb271294f"
 
       define_method(:install) do
         bin.install "caljp"
       end
     end
     if Hardware::CPU.arm?
-      url "https://github.com/7milch/caljp/releases/download/v2026.11.0/caljp_2026.11.0_darwin_arm64.tar.gz"
-      sha256 "1610f4671d55c61922da45ebfee27a3e7181f497147fb1ee22b3619791ac09c3"
+      url "https://github.com/7milch/caljp/releases/download/v2026.11.1/caljp_2026.11.1_darwin_arm64.tar.gz"
+      sha256 "1b724cded58b61dd6557b5eedaa8761f78d21b229e0b98f99d2c00d3d6bbf8bd"
 
       define_method(:install) do
         bin.install "caljp"
@@ -29,15 +29,15 @@ class Caljp < Formula
 
   on_linux do
     if Hardware::CPU.intel? && Hardware::CPU.is_64_bit?
-      url "https://github.com/7milch/caljp/releases/download/v2026.11.0/caljp_2026.11.0_linux_amd64.tar.gz"
-      sha256 "580405ad9bd9ec39907ae4dd030920770c99d8eed7ba3f50da310464410271e3"
+      url "https://github.com/7milch/caljp/releases/download/v2026.11.1/caljp_2026.11.1_linux_amd64.tar.gz"
+      sha256 "ce76bdafcd80ff036362b8aba5aa4d8cbf6b544277259df98da23a009bf13e71"
       define_method(:install) do
         bin.install "caljp"
       end
     end
     if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-      url "https://github.com/7milch/caljp/releases/download/v2026.11.0/caljp_2026.11.0_linux_arm64.tar.gz"
-      sha256 "45f311126e621a54a41f566d93ccf3ee91ac150629283ce938052de1edc22187"
+      url "https://github.com/7milch/caljp/releases/download/v2026.11.1/caljp_2026.11.1_linux_arm64.tar.gz"
+      sha256 "185e7bdabe1ad88cab887cfe02ef7763b7cc60a9bb8a31668182c57ca0241e6a"
       define_method(:install) do
         bin.install "caljp"
       end
