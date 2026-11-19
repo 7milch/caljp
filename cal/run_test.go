@@ -81,7 +81,7 @@ func TestRunErrors(t *testing.T) {
 		t.Errorf("-J: exit %d, stdout %q, stderr %q", code, out, errOut)
 	}
 	code, out, errOut = run(t, Env{}, "-x")
-	if code != 2 || out != "" || errOut != "caljp: unknown option -x\n"+Usage+"\n" {
+	if code != 2 || out != "" || errOut != "caljp: unknown option -x\n"+usage+"\n" {
 		t.Errorf("-x: exit %d, stdout %q, stderr %q", code, out, errOut)
 	}
 	for _, args := range []string{"--style sat=pink", "13 2027", "-A", "--color=sometimes"} {
@@ -96,7 +96,7 @@ func TestRunInfo(t *testing.T) {
 		t.Errorf("--version: exit %d, %q", code, out)
 	}
 	code, out, errOut := run(t, Env{}, "--help")
-	if code != 0 || errOut != "" || !strings.HasPrefix(out, Usage+"\n") {
+	if code != 0 || errOut != "" || !strings.HasPrefix(out, usage+"\n") {
 		t.Errorf("--help: exit %d, %q", code, out)
 	}
 	for _, s := range []string{"-M", "--style", "--refresh", "--color"} {

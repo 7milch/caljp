@@ -36,14 +36,14 @@ func TestParseHolidays(t *testing.T) {
 	if len(h) != 3 || !h[date(2026, time.November, 3)] || !h[date(2026, time.January, 1)] {
 		t.Errorf("parsed %v", h)
 	}
-	first, last := h.Range()
+	first, last := h.bounds()
 	if first != date(2026, time.January, 1) || last != date(2026, time.November, 23) {
 		t.Errorf("range %v..%v", first, last)
 	}
 }
 
 func TestEmbedded(t *testing.T) {
-	h := LoadHolidays("")
+	h := loadHolidays("")
 	if len(h) < 900 || !h[date(2026, time.November, 3)] || !h[date(1955, time.January, 1)] {
 		t.Errorf("embedded data looks wrong: %d days", len(h))
 	}
@@ -53,17 +53,17 @@ func TestEmbedded(t *testing.T) {
 }
 
 func TestLoadPrefersNewer(t *testing.T) {
-	_, embeddedLast := LoadHolidays("").Range()
+	_, embeddedLast := loadHolidays("").bounds()
 	future, past := date(embeddedLast.Year()+5, time.January, 1), date(1900, time.January, 1)
 
-	if h := LoadHolidays(writeCache(t, csvBody(future.Year(), 3))); !h[future] || len(h) != 3 {
+	if h := loadHolidays(writeCache(t, csvBody(future.Year(), 3))); !h[future] || len(h) != 3 {
 		t.Error("a cache with a later last date must win")
 	}
-	if h := LoadHolidays(writeCache(t, csvBody(1900, 3))); h[past] || len(h) < 900 {
+	if h := loadHolidays(writeCache(t, csvBody(1900, 3))); h[past] || len(h) < 900 {
 		t.Error("a cache with an earlier last date must lose")
 	}
 	same := "x,y\n" + embeddedLast.Format("2006/1/2") + ",only\n"
-	if h := LoadHolidays(writeCache(t, same)); len(h) != 1 {
+	if h := loadHolidays(writeCache(t, same)); len(h) != 1 {
 		t.Error("on a tie the cache must win")
 	}
 	for name, path := range map[string]string{
@@ -72,7 +72,7 @@ func TestLoadPrefersNewer(t *testing.T) {
 		"missing": filepath.Join(t.TempDir(), "nope.csv"),
 		"dir":     t.TempDir(),
 	} {
-		if h := LoadHolidays(path); len(h) < 900 {
+		if h := loadHolidays(path); len(h) < 900 {
 			t.Errorf("%s cache: expected embedded data, got %d days", name, len(h))
 		}
 	}
@@ -87,7 +87,7 @@ func TestRefresh(t *testing.T) {
 	defer srv.Close()
 
 	path := filepath.Join(t.TempDir(), "new", "dir", "holidays.csv")
-	h, err := Refresh(srv.URL, path)
+	h, err := refresh(srv.URL, path)
 	if err != nil || len(h) != 200 || !h[date(2030, time.January, 1)] {
 		t.Fatalf("refresh: %d days, err %v", len(h), err)
 	}
@@ -106,7 +106,7 @@ func TestRefresh(t *testing.T) {
 	}
 	for name, setup := range failures {
 		setup()
-		if _, err := Refresh(srv.URL, path); err == nil {
+		if _, err := refresh(srv.URL, path); err == nil {
 			t.Errorf("%s: expected an error", name)
 		}
 		if now, _ := os.ReadFile(path); string(now) != string(saved) {
@@ -115,13 +115,13 @@ func TestRefresh(t *testing.T) {
 	}
 
 	status, body = http.StatusOK, csvBody(2030, 200)+strings.Repeat("x", maxBody)
-	if _, err := Refresh(srv.URL, path); err == nil {
+	if _, err := refresh(srv.URL, path); err == nil {
 		t.Error("oversized body: expected an error")
 	}
 	body = csvBody(2030, 200)
 	blocked := filepath.Join(t.TempDir(), "holidays.csv")
 	os.MkdirAll(filepath.Join(blocked, "occupied"), 0o755)
-	if _, err := Refresh(srv.URL, blocked); err == nil {
+	if _, err := refresh(srv.URL, blocked); err == nil {
 		t.Error("cache path is a directory: expected an error")
 	}
 	if entries, _ := os.ReadDir(filepath.Dir(blocked)); len(entries) != 1 {
@@ -129,10 +129,10 @@ func TestRefresh(t *testing.T) {
 	}
 
 	srv.Close()
-	if _, err := Refresh(srv.URL, path); err == nil {
+	if _, err := refresh(srv.URL, path); err == nil {
 		t.Error("unreachable server: expected an error")
 	}
-	if _, err := Refresh(srv.URL, ""); err == nil {
+	if _, err := refresh(srv.URL, ""); err == nil {
 		t.Error("empty cache path: expected an error")
 	}
 }
