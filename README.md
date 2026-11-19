@@ -21,7 +21,14 @@ On a terminal, Sundays and holidays (the 3rd and 23rd above) are red, Saturdays 
 
 ### Install
 
-Download a binary for Linux or macOS from [Releases](https://github.com/7milch/caljp/releases) and put it on your `PATH`.
+With Homebrew, on macOS or Linux:
+
+```sh
+brew tap 7milch/caljp https://github.com/7milch/caljp
+brew install caljp
+```
+
+Or download a binary from [Releases](https://github.com/7milch/caljp/releases) and put it on your `PATH`.
 
 `go install github.com/7milch/caljp@latest` also works, but it builds the latest commit of `main` rather than a release, because Go does not recognise calendar versions as module versions.
 
@@ -51,6 +58,8 @@ caljp march           March of this year
 | `--version`, `--help` | Print the version / the usage |
 
 Short options can be combined (`-3M`) and values can be attached (`-A2`). Month and weekday names are always in English.
+
+A year alone always means the whole year, so `-1` and `-3` need a month: `caljp -3 11 2027`. Whenever the range is exactly January to December, the year layout is used, with the year printed once at the top.
 
 ### Colors
 
@@ -108,7 +117,14 @@ Su Mo Tu We Th Fr Sa
 
 ### インストール
 
-[Releases](https://github.com/7milch/caljp/releases) から Linux または macOS 用のバイナリをダウンロードし、`PATH` の通った場所に置いてください。
+macOS でも Linux でも、Homebrew で入れられます。
+
+```sh
+brew tap 7milch/caljp https://github.com/7milch/caljp
+brew install caljp
+```
+
+[Releases](https://github.com/7milch/caljp/releases) からバイナリをダウンロードして、`PATH` の通った場所に置く方法もあります。
 
 `go install github.com/7milch/caljp@latest` でも入りますが、リリース版ではなく `main` の最新コミットがビルドされます。Go がカレンダーバージョンをモジュールのバージョンとして認識しないためです。
 
@@ -138,6 +154,8 @@ caljp march           今年の 3 月
 | `--version`、`--help` | バージョン / 使い方を表示 |
 
 1 文字のオプションはまとめて書けます（`-3M`）。値は詰めて書けます（`-A2`）。月名と曜日名は常に英語です。
+
+年だけを指定すると必ず年間表示になるので、`-1` と `-3` には月も必要です（`caljp -3 11 2027`）。表示範囲がちょうど 1 月から 12 月のときは年間レイアウトになり、年は一番上に 1 回だけ表示されます。
 
 ### 色
 

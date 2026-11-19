@@ -19,3 +19,19 @@ archives:
 
 checksum:
   name_template: checksums.txt
+
+# The formula lives in this repository, so the default GITHUB_TOKEN can update it.
+brews:
+  - repository:
+      owner: 7milch
+      name: caljp
+    directory: Formula
+    homepage: https://github.com/7milch/caljp
+    description: BSD cal clone that colors Japanese holidays
+    license: MIT
+    commit_author:
+      name: github-actions[bot]
+      email: 41898282+github-actions[bot]@users.noreply.github.com
+    commit_msg_template: "chore: update the Homebrew formula to {{ .Tag }}"
+    test: |
+      assert_match version.to_s, shell_output("#{bin}/caljp --version")

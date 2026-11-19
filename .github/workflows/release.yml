@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency: release
 
@@ -27,6 +28,12 @@ jobs:
         with:
           go-version-file: go.mod
 
+      - name: Keep the schedule alive
+        # GitHub disables scheduled workflows after 60 days without repository activity.
+        run: gh workflow enable release.yml
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       - name: Update the holiday list
         env:
           URL: https://www8.cao.go.jp/chosei/shukujitsu/syukujitsu.csv
@@ -44,7 +51,7 @@ jobs:
         id: tag
         run: |
           last=$(git describe --tags --abbrev=0 2>/dev/null || true)
-          if [ "${{ github.event_name }}" = schedule ] && [ -n "$last" ] && [ -z "$(git log --oneline "$last..HEAD")" ]; then
+          if [ "${{ github.event_name }}" = schedule ] && [ -n "$last" ] && [ -z "$(git log --oneline "$last..HEAD" -- . ':!Formula')" ]; then
             echo "Nothing changed since $last."
             exit 0
           fi
