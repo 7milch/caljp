@@ -51,7 +51,7 @@ jobs:
         id: tag
         run: |
           last=$(git describe --tags --abbrev=0 2>/dev/null || true)
-          if [ "${{ github.event_name }}" = schedule ] && [ -n "$last" ] && [ -z "$(git log --oneline "$last..HEAD" -- . ':!Formula')" ]; then
+          if [ "${{ github.event_name }}" = schedule ] && [ -n "$last" ] && [ -z "$(git log --oneline "$last..HEAD")" ]; then
             echo "Nothing changed since $last."
             exit 0
           fi
@@ -68,6 +68,7 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAP_DEPLOY_KEY: ${{ secrets.TAP_DEPLOY_KEY }}
 
       - name: Remove the tag if the release failed
         if: failure() && steps.tag.outputs.tag != ''

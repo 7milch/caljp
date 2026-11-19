@@ -20,11 +20,15 @@ archives:
 checksum:
   name_template: checksums.txt
 
-# The formula lives in this repository, so the default GITHUB_TOKEN can update it.
+# The formula goes to the shared tap, pushed with a deploy key that can write only there.
 brews:
   - repository:
       owner: 7milch
-      name: caljp
+      name: homebrew-tap
+      branch: main
+      git:
+        url: git@github.com:7milch/homebrew-tap.git
+        private_key: "{{ .Env.TAP_DEPLOY_KEY }}"
     directory: Formula
     homepage: https://github.com/7milch/caljp
     description: BSD cal clone that colors Japanese holidays
@@ -32,6 +36,6 @@ brews:
     commit_author:
       name: github-actions[bot]
       email: 41898282+github-actions[bot]@users.noreply.github.com
-    commit_msg_template: "chore: update the Homebrew formula to {{ .Tag }}"
+    commit_msg_template: "caljp {{ .Tag }}"
     test: |
       assert_match version.to_s, shell_output("#{bin}/caljp --version")
