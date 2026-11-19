@@ -1,5 +1,7 @@
 # caljp
 
+<img src=".github/screenshot.png" width="622" alt="caljp -3 showing October to December 2026 with Sundays and holidays in red, Saturdays in blue and today in reverse video">
+
 [English](#english) | [日本語](#日本語)
 
 ## English
