@@ -114,6 +114,20 @@ func TestRefresh(t *testing.T) {
 		}
 	}
 
+	status, body = http.StatusOK, csvBody(2030, 200)+strings.Repeat("x", maxBody)
+	if _, err := Refresh(srv.URL, path); err == nil {
+		t.Error("oversized body: expected an error")
+	}
+	body = csvBody(2030, 200)
+	blocked := filepath.Join(t.TempDir(), "holidays.csv")
+	os.MkdirAll(filepath.Join(blocked, "occupied"), 0o755)
+	if _, err := Refresh(srv.URL, blocked); err == nil {
+		t.Error("cache path is a directory: expected an error")
+	}
+	if entries, _ := os.ReadDir(filepath.Dir(blocked)); len(entries) != 1 {
+		t.Errorf("temporary files left behind after a failed rename: %v", entries)
+	}
+
 	srv.Close()
 	if _, err := Refresh(srv.URL, path); err == nil {
 		t.Error("unreachable server: expected an error")

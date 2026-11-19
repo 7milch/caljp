@@ -39,14 +39,14 @@ func date(y int, m time.Month, d int) time.Time {
 // Parse reads BSD cal style arguments; now supplies the default month and year.
 func Parse(args []string, now time.Time) (Options, error) {
 	o := Options{Color: "auto"}
-	span, before, after, monthArg := byte('1'), 0, 0, ""
+	span, before, after, monthArg := byte(0), 0, 0, ""
 	var pos []string
 	var err error
 
 	for i := 0; i < len(args) && err == nil; i++ {
 		a := args[i]
-		value := func(name, inline string) string {
-			if inline != "" {
+		value := func(name, inline string, attached bool) string {
+			if attached {
 				return inline
 			}
 			if i++; i < len(args) {
@@ -59,7 +59,10 @@ func Parse(args []string, now time.Time) (Options, error) {
 		case a == "--":
 			pos, i = append(pos, args[i+1:]...), len(args)
 		case strings.HasPrefix(a, "--"):
-			name, inline, _ := strings.Cut(a, "=")
+			name, inline, found := strings.Cut(a, "=")
+			if found && name != "--color" && name != "--style" {
+				err = fmt.Errorf("option %s takes no argument", name)
+			}
 			switch name {
 			case "--refresh":
 				o.Refresh = true
@@ -68,9 +71,9 @@ func Parse(args []string, now time.Time) (Options, error) {
 			case "--help":
 				o.Help = true
 			case "--color":
-				o.Color = value(name, inline)
+				o.Color = value(name, inline, found)
 			case "--style":
-				o.Style = value(name, inline)
+				o.Style = value(name, inline, found)
 			default:
 				err = fmt.Errorf("unknown option %s", name)
 			}
@@ -89,7 +92,7 @@ func Parse(args []string, now time.Time) (Options, error) {
 				case 'M', 'S':
 					o.Monday = c == 'M'
 				case 'A', 'B', 'm':
-					v := value(name, a[j+1:])
+					v := value(name, a[j+1:], j+1 < len(a))
 					j = len(a)
 					switch {
 					case err != nil:

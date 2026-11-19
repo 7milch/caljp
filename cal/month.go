@@ -16,6 +16,9 @@ func months(pos []string, monthArg string, span byte, now time.Time) (time.Time,
 		if m, e := parseMonth(pos[0]); e == nil && !isNumber(pos[0]) {
 			month = m
 		} else if year, err = parseYear(pos[0]); err == nil && monthArg == "" {
+			if span == '1' || span == '3' {
+				err = fmt.Errorf("-%c cannot be combined with a year alone; add a month", span)
+			}
 			span = 'y'
 		}
 	case 2:

@@ -19,6 +19,8 @@ const HolidayURL = "https://www8.cao.go.jp/chosei/shukujitsu/syukujitsu.csv"
 // minHolidays rejects downloads that are not the real list.
 const minHolidays = 100
 
+const maxBody = 1 << 20
+
 //go:embed holidays.csv
 var embedded []byte
 
@@ -83,22 +85,30 @@ func Refresh(url, cachePath string) (Holidays, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	data, err := io.ReadAll(resp.Body)
+	data, err := io.ReadAll(io.LimitReader(resp.Body, maxBody+1))
 	if err != nil {
 		return nil, err
 	}
 	h := parseHolidays(bytes.NewReader(data))
-	if resp.StatusCode != http.StatusOK || len(h) < minHolidays {
-		return nil, fmt.Errorf("%s: %s, %d holidays found (want at least %d)", url, resp.Status, len(h), minHolidays)
+	if resp.StatusCode != http.StatusOK || len(h) < minHolidays || len(data) > maxBody {
+		return nil, fmt.Errorf("%s: %s, %d bytes, %d holidays found (want at least %d)", url, resp.Status, len(data), len(h), minHolidays)
 	}
 
 	// Write beside the target so the rename is atomic.
 	if err := os.MkdirAll(filepath.Dir(cachePath), 0o755); err != nil {
 		return nil, err
 	}
-	tmp := cachePath + ".tmp"
-	if err := os.WriteFile(tmp, data, 0o644); err != nil {
+	tmp, err := os.CreateTemp(filepath.Dir(cachePath), "holidays-*.tmp")
+	if err != nil {
 		return nil, err
 	}
-	return h, os.Rename(tmp, cachePath)
+	defer os.Remove(tmp.Name())
+	_, err = tmp.Write(data)
+	if e := tmp.Close(); err == nil {
+		err = e
+	}
+	if err == nil {
+		err = os.Rename(tmp.Name(), cachePath)
+	}
+	return h, err
 }

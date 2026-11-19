@@ -56,6 +56,9 @@ func TestParse(t *testing.T) {
 		{"--version", "2026-11", 1, with(func(o *Options) { o.Version = true })},
 		{"--help", "2026-11", 1, with(func(o *Options) { o.Help = true })},
 		{"-- 2027", "2027-01", 12, base},
+		{"-3 -m 8 2027", "2027-07", 3, base},
+		{"-3 -y 2027", "2027-01", 12, base},
+		{"--style= 2027", "2027-01", 12, base},
 	}
 	for _, tt := range tests {
 		got, err := Parse(strings.Fields(tt.args), now)
@@ -107,6 +110,13 @@ func TestParseErrors(t *testing.T) {
 		{"--color=sometimes", "sometimes"},
 		{"-B -1", "month"},
 		{"-", "-"},
+		{"-3 2027", "-3 cannot be combined with a year alone"},
+		{"2027 -3", "-3 cannot be combined with a year alone"},
+		{"-1 2027", "-1 cannot be combined with a year alone"},
+		{"--color= never", `invalid --color value ""`},
+		{"--refresh=x", "--refresh takes no argument"},
+		{"--help=", "--help takes no argument"},
+		{"--version=1", "--version takes no argument"},
 	}
 	for _, tt := range tests {
 		_, err := Parse(strings.Fields(tt.args), now)
