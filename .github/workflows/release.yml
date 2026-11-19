@@ -1,0 +1,61 @@
+name: release
+
+on:
+  schedule:
+    - cron: "0 0 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency: release
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+
+      - name: Update the holiday list
+        env:
+          URL: https://www8.cao.go.jp/chosei/shukujitsu/syukujitsu.csv
+        run: |
+          curl -fsSL "$URL" | iconv -f CP932 -t UTF-8 | tr -d '\r' > cal/holidays.csv
+          go test ./...
+          if ! git diff --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -am "chore: update holidays.csv"
+            git push
+          fi
+
+      - name: Tag
+        id: tag
+        run: |
+          last=$(git describe --tags --abbrev=0 2>/dev/null || true)
+          if [ "${{ github.event_name }}" = schedule ] && [ -n "$last" ] && [ -z "$(git log --oneline "$last..HEAD")" ]; then
+            echo "Nothing changed since $last."
+            exit 0
+          fi
+          # CalVer vYYYY.M.N, N counting this month's releases from 0.
+          prefix="v$(date -u +%Y.%-m)"
+          tag="$prefix.$(git tag --list "$prefix.*" | wc -l)"
+          git tag "$tag"
+          git push origin "$tag"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - uses: goreleaser/goreleaser-action@v7
+        if: steps.tag.outputs.tag != ''
+        with:
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
